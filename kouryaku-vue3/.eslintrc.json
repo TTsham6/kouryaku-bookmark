@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "camelcase": ["error", { "allow": ["user_", "game_", "bookmark_"] }]
+  }
+}
