@@ -1,29 +1,51 @@
 // ヘッダー
 <template>
-  <header class="header">
-    <div>攻略ブックマーク</div>
+  <header>
+    <div class="content">
+      <div></div>
+      <h1 class="title">攻略ブックマーク</h1>
+      <nav class="nav">
+        <button type="button" @click="doLogout">ログアウト</button>
+      </nav>
+    </div>
   </header>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import store from "../store";
 
 export default defineComponent({
-  name: "Header"
+  name: "Header",
+  setup() {
+    const doLogout = () => {
+      store.dispatch("resetAuth");
+    };
+  }
 });
 </script>
 
 <style lang="scss">
-.header {
+header {
+  display: flex;
+  width: 100%;
   height: 100px;
-  text-align: center;
-  vertical-align: middle;
   background-color: gray;
-  font-size: 40px;
-  color: #f5f5f5;
-}
 
-.header div {
-  line-height: 100px;
+  .content {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 15% 70% 15%;
+
+    .title {
+      margin: auto;
+      color: #f5f5f5;
+    }
+
+    .nav {
+      margin: auto;
+      padding: 10px;
+    }
+  }
 }
 </style>

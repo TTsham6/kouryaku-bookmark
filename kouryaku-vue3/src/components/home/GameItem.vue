@@ -4,24 +4,21 @@
       <router-link
         :to="{
           name: 'Game',
-          params: { user_id: userId, gameName: gameName }
+          params: {
+            game_id: game.id
+          },
+          query: {
+            name: game.game_name
+          }
         }"
-        >{{ gameName }}</router-link
+        ><span>{{ game.game_name }}</span></router-link
       >
     </div>
     <div class="game__button-area">
-      <button
-        type="game__button"
-        class="button btn-outline-primary"
-        @click="openModal"
-      >
+      <button type="button" class="custom-button" @click="openModal">
         編集
       </button>
-      <button
-        type="game__button"
-        class="button btn-outline-primary"
-        @click="deleteGame"
-      >
+      <button type="button" class="custom-button" @click="deleteGame">
         削除
       </button>
     </div>
@@ -29,29 +26,33 @@
     <modal-template @close="closeModal" v-if="state.showUpdateModal">
       <template v-slot:body>
         <p>ゲーム編集</p>
-        <div>
-          <input
-            type="text"
-            v-model="state.newGameName"
-            placeholder="ゲーム名を入力"
-          />
-        </div>
+        <input
+          type="text"
+          v-model="state.newGameName"
+          placeholder="ゲーム名を入力"
+        />
       </template>
       <template v-slot:footer>
-        <button @click="updateGame">送信</button>
-        <button @click="closeModal">閉じる</button>
+        <button class="custom-button" @click="updateGame">送信</button>
+        <button class="custom-button" @click="closeModal">閉じる</button>
       </template>
     </modal-template>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, reactive, SetupContext } from "vue";
-import { GameData } from "../../types/game";
+import {
+  computed,
+  defineComponent,
+  PropType,
+  reactive,
+  SetupContext
+} from "vue";
+import { GameData } from "../../types/type";
 import ModalTemplate from "../ModalTemplate.vue";
 
 type Props = {
-  gameData: GameData;
+  game: GameData;
 };
 
 export default defineComponent({
@@ -59,7 +60,7 @@ export default defineComponent({
     ModalTemplate
   },
   props: {
-    gameData: {
+    game: {
       type: Object as PropType<GameData>,
       required: true
     }
@@ -82,20 +83,22 @@ export default defineComponent({
 
     /** ゲームデータを編集する */
     const updateGame = () => {
-      context.emit("update-game", props.gameData);
+      const newGame: GameData = {
+        id: props.game.id,
+        user_id: props.game.user_id,
+        game_name: state.newGameName
+      };
+      context.emit("update-game", newGame);
       closeModal();
     };
 
     /** ゲームデータを削除する */
     const deleteGame = () => {
-      context.emit("delete-game", props.gameData);
+      context.emit("delete-game", props.game);
     };
 
     return {
       state,
-      gameId: props.gameData.gameId,
-      userId: props.gameData.userId,
-      gameName: props.gameData.gameName,
       openModal,
       closeModal,
       updateGame,
@@ -106,19 +109,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@import url("../../styles/styles.scss");
+
 .game {
   &__name {
     text-align: left;
     float: left;
+    font-size: 25px;
   }
 
   &__button-area {
     text-align: right;
-  }
-
-  &__button {
-    margin: 5px;
-    padding: 5px;
   }
 }
 </style>

@@ -1,22 +1,16 @@
 // ブックマークアイテム
 <template>
   <div class="bookmark">
-    <a :href="url" target="_blank">
-      <span class="bookmark__name">{{ bookmarkName }}</span>
+    <a :href="bookmark.url" target="_blank">
+      <span class="bookmark__name"
+        ><u>{{ bookmark.bookmark_name }}</u></span
+      >
     </a>
     <div class="bookmark__button-area">
-      <button
-        type="button"
-        class="bookmark__button btn-outline-primary"
-        @click="openModal"
-      >
+      <button type="button" class="custom-button" @click="openModal">
         編集
       </button>
-      <button
-        type="button"
-        class="bookmark__button btn-outline-primary"
-        @click="deleteBookmark"
-      >
+      <button type="button" class="custom-button" @click="deleteBookmark">
         削除
       </button>
     </div>
@@ -25,20 +19,16 @@
     <modal-template @close="closeModal" v-if="state.showUpdateModal">
       <template v-slot:body>
         <p>ブックマーク編集</p>
-        <div>
-          <input
-            type="text"
-            v-model="state.newBookmarkName"
-            placeholder="ブックマーク名を入力"
-          />
-        </div>
-        <div>
-          <input type="text" v-model="state.newUrl" placeholder="URLを入力" />
-        </div>
+        <input
+          type="text"
+          v-model="state.newBookmarkName"
+          placeholder="ブックマーク名を入力"
+        />
+        <input type="text" v-model="state.newUrl" placeholder="URLを入力" />
       </template>
       <template v-slot:footer>
-        <button @click="updateBookmark">送信</button>
-        <button @click="closeModal">閉じる</button>
+        <button class="custom-button" @click="updateBookmark">送信</button>
+        <button class="custom-button" @click="closeModal">閉じる</button>
       </template>
     </modal-template>
   </div>
@@ -46,11 +36,11 @@
 
 <script lang="ts">
 import { defineComponent, PropType, reactive, SetupContext } from "vue";
-import { BookmarkData } from "../../types/bookmark";
+import { BookmarkData } from "../../types/type";
 import ModalTemplate from "../ModalTemplate.vue";
 
 type Props = {
-  bookmarkData: BookmarkData;
+  bookmark: BookmarkData;
 };
 
 export default defineComponent({
@@ -58,7 +48,7 @@ export default defineComponent({
     ModalTemplate
   },
   props: {
-    bookmarkData: {
+    bookmark: {
       type: Object as PropType<BookmarkData>,
       required: true
     }
@@ -86,20 +76,26 @@ export default defineComponent({
 
     /** ブックマークを編集する */
     const updateBookmark = () => {
-      context.emit("update-bookmark", props.bookmarkData);
+      // TODO 空白の場合のバリデーション
+      const newBookmark: BookmarkData = {
+        id: props.bookmark.id,
+        game_id: props.bookmark.game_id,
+        bookmark_name: state.newBookmarkName
+          ? state.newBookmarkName
+          : props.bookmark.bookmark_name,
+        url: state.newUrl ? state.newUrl : props.bookmark.url
+      };
+      context.emit("update-bookmark", newBookmark);
       closeModal();
     };
 
     /** ブックマークを削除する */
     const deleteBookmark = () => {
-      context.emit("delete-bookmark", props.bookmarkData);
+      context.emit("delete-bookmark", props.bookmark);
     };
 
     return {
       state,
-      bookmarkId: props.bookmarkData.bookmarkId,
-      bookmarkName: props.bookmarkData.bookmarkName,
-      url: props.bookmarkData.url,
       openModal,
       closeModal,
       updateBookmark,
@@ -110,19 +106,17 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@import url("../../styles/styles.scss");
+
 .bookmark {
   &__name {
     text-align: left;
     float: left;
+    font-size: 25px;
   }
 
   &__button-area {
     text-align: right;
-  }
-
-  &__button {
-    margin: 5px;
-    padding: 5px;
   }
 }
 </style>

@@ -1,29 +1,28 @@
+// ゲームコンテナ
 <template>
   <div class="game container-fluid bg-1 text-center">
     <div class="game__title">
       <p>ゲーム一覧</p>
     </div>
     <div class="game__create-button">
-      <button type="button" class="btn-primary" @click="openModal">
+      <button type="button" class="custom-button" @click="openModal">
         ゲームページを作成
       </button>
     </div>
 
-    <!-- モーダル -->
+    <!-- 新規作成モーダル -->
     <modal-template @close="closeModal" v-if="state.showCreateModal">
       <template v-slot:body>
         <p>新規ゲーム作成</p>
-        <div>
-          <input
-            type="text"
-            v-model="state.newGameName"
-            placeholder="ゲーム名を入力"
-          />
-        </div>
+        <input
+          type="text"
+          v-model="state.newGameName"
+          placeholder="ゲーム名を入力"
+        />
       </template>
       <template v-slot:footer>
-        <button @click="createGame">送信</button>
-        <button @click="closeModal">閉じる</button>
+        <button class="custom-button" @click="createGame">送信</button>
+        <button class="custom-button" @click="closeModal">閉じる</button>
       </template>
     </modal-template>
     <!-- モーダルここまで -->
@@ -31,9 +30,9 @@
     <!-- ゲームページ一覧 -->
     <div class="game__list">
       <ul>
-        <li v-for="gameItem of state.gameList" :key="gameItem.gameId">
-          <game-item
-            :game-data="gameItem"
+        <li v-for="gameItem in state.gameList" :key="gameItem.id">
+          <GameItem
+            :game="gameItem"
             @update-game="updateGame"
             @deleteGame="deleteGame"
           />
@@ -45,10 +44,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive } from "vue";
-import { GameData } from "../../types/game";
+import { computed, defineComponent, reactive, watch } from "vue";
+import { GameData } from "../../types/type";
 import ModalTemplate from "../ModalTemplate.vue";
 import GameItem from "./GameItem.vue";
+import store from "../../store/index";
+import {
+  getGamesApi,
+  createGameApi,
+  updateGameApi,
+  deleteGameApi
+} from "../../api/game-api";
 
 export default defineComponent({
   components: {
@@ -58,10 +64,13 @@ export default defineComponent({
   setup() {
     /** テストデータ */
     const testData1: GameData = {
-      gameId: 1,
-      userId: 1,
-      gameName: "hoge"
+      id: 1,
+      user_id: 1,
+      game_name: "hoge"
     };
+
+    const userId = store.getters.getUserId;
+    const token = store.getters.getToken;
 
     const state = reactive<{
       gameList: GameData[];
@@ -72,8 +81,6 @@ export default defineComponent({
       newGameName: "",
       showCreateModal: false
     });
-
-    const userId = state.gameList[0].userId;
 
     /** ゲーム作成モーダルを開く */
     const openModal = () => {
@@ -88,13 +95,13 @@ export default defineComponent({
     /** ゲームを新規作成する */
     const createGame = () => {
       if (state.newGameName.length > 0) {
-        alert(state.newGameName);
-        // TODO APIから新しいアイテムを取得する
         const newGame: GameData = {
-          gameId: 12,
-          gameName: "ゼルダの伝説ムジュラの仮面"
+          user_id: userId,
+          game_name: state.newGameName
         };
-        state.gameList.push(newGame);
+        createGameApi(newGame)
+          .then(res => state.gameList.unshift(res.data.data))
+          .catch(err => err);
         closeModal();
       } else {
         alert("メッセージを入力してください");
@@ -106,17 +113,19 @@ export default defineComponent({
      * @param {GameData} targetGame
      */
     const updateGame = (targetGame: GameData) => {
-      console.log(targetGame);
-      // TODO APIから更新済みのゲームを取得
-      const updatedGame = targetGame;
-      // リスト内のゲームを探索し、対象アイテムを更新する
-      state.gameList = state.gameList.map(game => {
-        if (game.gameId === updatedGame.gameId) {
-          // IDが一致するアイテムを更新する
-          return updatedGame;
-        }
-        return game;
-      });
+      updateGameApi(targetGame)
+        .then(res => {
+          const updatedGame = res.data.data;
+          // リスト内のゲームを探索し、対象アイテムを更新する
+          state.gameList = state.gameList.map(game => {
+            if (game.id === updatedGame.id) {
+              // IDが一致するアイテムを更新する
+              return updatedGame;
+            }
+            return game;
+          });
+        })
+        .catch(err => err);
     };
 
     /**
@@ -124,18 +133,25 @@ export default defineComponent({
      * @param {GameData} targetGame
      */
     const deleteGame = (targetGame: GameData) => {
-      // TODO APIから削除済みのゲームを取得
-      const deletedGame = targetGame;
-      // リスト内を探索し、対象ゲームを削除する
-      state.gameList = state.gameList.filter(game => {
-        // IDが一致するアイテムを除外する
-        return game.gameId !== deletedGame.gameId;
-      });
+      deleteGameApi(targetGame)
+        .then(res => {
+          const deletedGame = res.data.data;
+          // リスト内を探索し、対象ゲームを削除する
+          state.gameList = state.gameList.filter(game => {
+            // IDが一致するアイテムを除外する
+            return game.id !== deletedGame.id;
+          });
+        })
+        .catch(err => err);
     };
+
+    // 初期表示時の処理
+    getGamesApi(userId, token)
+      .then(res => (state.gameList = res.data.data))
+      .catch(err => err);
 
     return {
       state,
-      userId,
       openModal,
       closeModal,
       createGame,
@@ -147,6 +163,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
+@import url("../../styles/styles.scss");
+
 .game {
   flex: 1;
   text-align: center;
@@ -184,7 +202,6 @@ export default defineComponent({
     background: #f5f5f5;
     border-left: solid 8px orange; /*左側の線*/
     margin-bottom: 20px;
-    line-height: 2;
     border-radius: 0 15px 15px 0;
     padding: 1em;
     list-style-type: none;

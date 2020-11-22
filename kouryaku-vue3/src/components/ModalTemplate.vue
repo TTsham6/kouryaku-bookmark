@@ -7,7 +7,9 @@
         </div>
         <footer class="modal__footer">
           <slot name="footer">
-            <button @click="$emit('close')">閉じる</button>
+            <button class="custom-button" @click="$emit('close')">
+              閉じる
+            </button>
           </slot>
         </footer>
       </div>
@@ -21,6 +23,7 @@ export default defineComponent({});
 </script>
 
 <style lang="scss">
+@import url("../styles/styles.scss");
 .modal {
   &__overlay {
     display: flex;
@@ -42,7 +45,17 @@ export default defineComponent({});
   }
 
   &__content {
+    width: 200px;
+    height: 150px;
     padding: 10px 20px;
+
+    p {
+      font-size: 20px;
+    }
+
+    div {
+      margin: 5px;
+    }
   }
 
   &__footer {
