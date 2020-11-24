@@ -1,10 +1,10 @@
 class ApplicationController < ActionController::API
 	include ActionController::HttpAuthentication::Token::ControllerMethods
 
+	@session = {}
+
 	before_action :set_session
 	before_action :require_login
-
-	@session = {}
 
 	def require_login
 		render json: { error: 'unauthorized' }, status: :unauthorized if @session.empty?

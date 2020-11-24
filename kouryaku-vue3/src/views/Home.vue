@@ -8,7 +8,7 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, watch } from "vue";
+import { computed, defineComponent, watch } from "vue";
 import Header from "../components/Header.vue";
 import GameContainer from "../components/home/GameContainer.vue";
 import Footer from "../components/Footer.vue";
@@ -31,7 +31,6 @@ export default defineComponent({
       token,
       () => {
         if (!token.value) {
-          console.log(token.value);
           router.push("/login");
         }
       },

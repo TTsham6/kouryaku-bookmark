@@ -1,5 +1,6 @@
 import { GameData } from "@/types/type";
 import axios, { AxiosRequestConfig } from "axios";
+import { createHeaders } from "../util/auth-util";
 
 const API_URL = process.env.VUE_APP_API_HOST + "/games/";
 const timeout = 15000;
@@ -14,11 +15,13 @@ export const getGamesApi = async (
   userId: number,
   token: string
 ): Promise<any> => {
-  headers["Content-Type"] = "application/x-www-form-urlencoded";
-  if (token) {
-    headers["Authorization"] = "Token ${authState.token}";
-    headers["User-Id"] = String(userId);
-  }
+  // headers["Content-Type"] = "application/x-www-form-urlencoded";
+  // if (token) {
+  //   headers["Authorization"] = "Token ${authState.token}";
+  //   headers["User-Id"] = String(userId);
+  // }
+
+  const headers = createHeaders("application/x-www-form-urlencoded");
 
   const config: AxiosRequestConfig = {
     url: API_URL,
@@ -54,9 +57,7 @@ export const createGameApi = async (newGame: GameData): Promise<any> => {
     timeout
   };
 
-  return axios(config)
-    .then(res => res)
-    .catch(err => err);
+  return axios(config);
 };
 
 /**
@@ -75,9 +76,7 @@ export const updateGameApi = async (targetGame: GameData): Promise<any> => {
     timeout
   };
 
-  return axios(config)
-    .then(res => res)
-    .catch(err => err);
+  return axios(config);
 };
 
 /**
@@ -95,7 +94,5 @@ export const deleteGameApi = async (targetGame: GameData) => {
     timeout
   };
 
-  return axios(config)
-    .then(res => res)
-    .catch(err => err);
+  return axios(config);
 };

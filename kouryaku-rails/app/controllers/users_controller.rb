@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
 
-	before_action :set_user, only: %i[create]
+	skip_before_action :require_login, only:[:create]
+	before_action :post_params, only: %i[create]
 
 	# ユーザーを新規作成する
 	def create 

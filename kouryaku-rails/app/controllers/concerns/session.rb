@@ -13,7 +13,7 @@ module Session
 		return token
 	end
 
-	def self.destory(token)
+	def self.destroy(token)
 		REDIS.delete(token)
 	end
 end

@@ -12,9 +12,7 @@ export const getToken = async function(
   data: UserData
 ): Promise<any> {
   // ヘッダー作成
-
   headers["Content-Type"] = "application/json";
-  // ログイン済みの場合
   if (authState.token) {
     // 取得済みのトークンとユーザーIDを設定
     headers["Authorization"] = "Token ${authState.token}";
@@ -30,25 +28,26 @@ export const getToken = async function(
     data
   };
 
-  return axios(config)
-    .then(res => res)
-    .catch(err => err);
+  return axios(config);
 };
 
-export const deleteToken = async (token: string) => {
+export const deleteToken = async (authState: AuthState) => {
   headers["Content-Type"] = "application/json";
+  if (authState.token) {
+    // 取得済みのトークンとユーザーIDを設定
+    headers["Authorization"] = "Token " + authState.token;
+    headers["User-Id"] = String(authState.userId);
+  }
   // リクエスト設定
   const config: AxiosRequestConfig = {
-    url: API_URL,
-    method: "post",
+    url: API_URL + String(authState.userId),
+    method: "delete",
     headers,
     timeout,
     data: {
-      token
+      token: authState.token
     }
   };
 
-  return axios(config)
-    .then(res => res)
-    .catch(err => err);
+  return axios(config);
 };

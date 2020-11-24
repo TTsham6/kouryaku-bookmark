@@ -141,7 +141,7 @@ export default defineComponent({
         .then(res => {
           const updateBookmark = res.data.data;
           // リスト内のブックマークを探索し、対象アイテムを更新する
-          state.bookmarkList = state.bookmarkList.map(bookmark => {
+          state.bookmarkList = state.bookmarkList.map((bookmark:BookmarkData) => {
             if (bookmark.id === updateBookmark.id) {
               // IDが一致するアイテムを更新する
               return updateBookmark;

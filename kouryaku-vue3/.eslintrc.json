@@ -1,5 +1,39 @@
 {
+  "root": true,
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:vue/vue3-essential",
+    "plugin:vue/vue3-recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "@vue/typescript/recommended",
+    "@vue/prettier",
+    "@vue/prettier/@typescript-eslint"
+  ],
+  "parser": "vue-eslint-parser",
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser",
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "vue"
+  ],
   "rules": {
-    "camelcase": ["error", { "allow": ["user_", "game_", "bookmark_"] }]
+    "camelcase": [
+      "error",
+      {
+        "allow": [
+          "user_",
+          "game_",
+          "bookmark_"
+        ]
+      }
+    ]
   }
 }

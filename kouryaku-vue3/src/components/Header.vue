@@ -21,6 +21,10 @@ export default defineComponent({
     const doLogout = () => {
       store.dispatch("resetAuth");
     };
+
+    return{
+      doLogout
+    }
   }
 });
 </script>

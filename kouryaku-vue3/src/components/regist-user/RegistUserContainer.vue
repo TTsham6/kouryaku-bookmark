@@ -46,7 +46,9 @@
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import store from "../../store";
-import { createUser } from "../../api/user-api";
+import { createUser } from "@/api/user-api";
+import { useRouter } from "vue-router";
+
 
 export default defineComponent({
   setup() {
@@ -54,6 +56,8 @@ export default defineComponent({
       email: "",
       password: ""
     });
+
+    const router = useRouter();
 
     // ユーザー登録する
     const registUser = (email: string, password: string) => {
@@ -65,7 +69,8 @@ export default defineComponent({
 
     return {
       state,
-      registUser
+      registUser,
+      router
     };
   }
 });

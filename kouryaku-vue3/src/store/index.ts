@@ -1,6 +1,6 @@
 import { createStore } from "vuex";
 import { AuthState } from "@/types/store-type";
-import createPeresistedState from "vuex-persistedstate";
+import createPersistedState from "vuex-persistedstate";
 import { getToken, deleteToken } from "@/api/auth-api";
 import { UserData } from "@/types/type";
 
@@ -31,12 +31,15 @@ export default createStore<AuthState>({
   actions: {
     fetchAuth({ commit }, data: UserData) {
       getToken(state, data)
-        .then(res => commit("setAuth", res.data))
+        .then(res => {
+          console.log(res.data);
+          commit("setAuth", res.data);
+        })
         .catch(err => commit("setAuth", { error: err }));
     },
     resetAuth({ commit }) {
-      deleteToken(state.token)
-        .then(() => commit("destory"))
+      deleteToken(state)
+        .then(() => commit("destroy"))
         .catch(err => err);
     }
   },
@@ -44,15 +47,14 @@ export default createStore<AuthState>({
     setAuth(state, payload: AuthState) {
       state.userId = payload.userId;
       state.token = payload.token;
-      console.log(state);
     },
-    resetAuth(state) {
+    destroy(state) {
       state.userId = 0;
       state.token = "";
     }
   },
   plugins: [
-    createPeresistedState({
+    createPersistedState({
       key: "example",
       storage: window.sessionStorage
     })
