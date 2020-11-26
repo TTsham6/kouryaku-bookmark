@@ -1,56 +1,53 @@
 import { createStore } from "vuex";
-import { AuthState } from "@/types/store-type";
 import createPersistedState from "vuex-persistedstate";
 import { getToken, deleteToken } from "@/api/auth-api";
-import { UserData } from "@/types/type";
+import { AuthData, UserData } from "@/types/type";
+import router from "@/router";
 
-// const state: AuthState = {
-//   userId: 1,
-//   token: "token",
-//   loading: 0,
-//   error: ""
-// };
-
-const state: AuthState = {
-  userId: 0,
-  token: "",
-  loading: 0,
-  error: ""
+const defaultState: AuthData = {
+  id: 0,
+  user_id: 0,
+  token: ""
 };
 
-export default createStore<AuthState>({
-  state,
+export default createStore<AuthData>({
+  state: defaultState,
   getters: {
     getToken(state) {
       return state.token;
     },
     getUserId(state) {
-      return state.userId;
+      return state.user_id;
     }
   },
   actions: {
-    fetchAuth({ commit }, data: UserData) {
-      getToken(state, data)
-        .then(res => {
-          console.log(res.data);
-          commit("setAuth", res.data);
-        })
-        .catch(err => commit("setAuth", { error: err }));
+    async fetchAuth({ commit }, data: UserData) {
+      try {
+        const res = await getToken(data);
+        commit("setAuth", res);
+        await router.push("/");
+      } catch (e) {
+        console.log(e.message);
+      }
     },
-    resetAuth({ commit }) {
-      deleteToken(state)
-        .then(() => commit("destroy"))
-        .catch(err => err);
+    async resetAuth({ commit, state }) {
+      try {
+        const res = await deleteToken(state);
+        commit("destroyAuth", res);
+        await router.push("/login");
+      } catch (e) {
+        console.log(e.message);
+      }
     }
   },
   mutations: {
-    setAuth(state, payload: AuthState) {
-      state.userId = payload.userId;
+    setAuth(state, payload: AuthData) {
+      state.user_id = payload.user_id;
       state.token = payload.token;
     },
-    destroy(state) {
-      state.userId = 0;
-      state.token = "";
+    destroyAuth(state, payload: AuthData) {
+      console.log(payload);
+      Object.assign(state, defaultState);
     }
   },
   plugins: [

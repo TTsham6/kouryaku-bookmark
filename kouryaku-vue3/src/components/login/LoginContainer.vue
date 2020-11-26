@@ -7,10 +7,10 @@
       <div class="field">
         <div class="control">
           <input
+            v-model="state.email"
             class="input is-large"
             type="email"
             placeholder="Eメール"
-            v-model="state.email"
             autofocus=""
             name="email"
           />
@@ -20,10 +20,10 @@
       <div class="field">
         <div class="control">
           <input
+            v-model="state.password"
             class="input is-large"
             type="password"
             placeholder="パスワード"
-            v-model="state.password"
             maxlength="20"
             name="password"
           />
@@ -66,7 +66,7 @@ export default defineComponent({
     };
 
     /** */
-    const toRegistUser = ()=>router.push({ name: 'regist-user' })
+    const toRegistUser = () => router.push({ name: "regist-user" });
 
     return {
       state,

@@ -6,7 +6,7 @@ import RegistUser from "../views/RegistUser.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/home/:user_id?",
+    path: "/:user_id?",
     name: "Home",
     component: Home
   },

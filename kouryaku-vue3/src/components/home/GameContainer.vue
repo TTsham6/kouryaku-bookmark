@@ -44,45 +44,34 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, watch } from "vue";
+import { defineComponent, reactive } from "vue";
 import { GameData } from "../../types/type";
 import ModalTemplate from "../ModalTemplate.vue";
 import GameItem from "./GameItem.vue";
 import store from "../../store/index";
-import router from "../../router";
-
-import {
-  getGamesApi,
-  createGameApi,
-  updateGameApi,
-  deleteGameApi
-} from "../../api/game-api";
+import { useRouter } from "vue-router";
+import { Method } from "axios";
+import { createApi, deleteApi, indexApi, updateApi } from "@/api";
 
 export default defineComponent({
   components: {
     ModalTemplate,
     GameItem
   },
-  setup() {
-    /** テストデータ */
-    const testData1: GameData = {
-      id: 1,
-      user_id: 1,
-      game_name: "hoge"
-    };
-
-    const userId = store.getters.getUserId;
-    const token = store.getters.getToken;
-
+  setup: function() {
     const state = reactive<{
       gameList: GameData[];
       newGameName: string;
       showCreateModal: boolean;
     }>({
-      gameList: [testData1],
+      gameList: [],
       newGameName: "",
       showCreateModal: false
     });
+
+    const router = useRouter();
+
+    // モーダル画面操作関数
 
     /** ゲーム作成モーダルを開く */
     const openModal = () => {
@@ -94,16 +83,75 @@ export default defineComponent({
       state.showCreateModal = false;
     };
 
-    /** ゲームを新規作成する */
+    // APIリクエスト関数
+
+    /**
+     * APIへのリクエストメイン処理
+     * @param {Method} method
+     * @param {GameData} data
+     */
+    const execRequest = async (method: Method, data?: GameData) => {
+      const gameUrl = "games";
+      try {
+        // リクエストの種類によって呼び出すAPIを分岐
+        if (method === "GET") {
+          // ゲームリスト取得
+          const params = {
+            user_id: String(store.getters.getUserId)
+          };
+          const result = await indexApi(gameUrl, params);
+          state.gameList = result as GameData[];
+        } else if (method === "POST" && data) {
+          // ゲーム新規作成
+          const result = await createApi(gameUrl, data);
+          const newGame = result as GameData;
+          state.gameList.unshift(newGame);
+        } else if (method === "PUT" && data) {
+          // ゲーム更新
+          const result = await updateApi(gameUrl, data);
+          const updatedGame = result as GameData;
+          // リスト内のゲームを探索し、対象アイテムを更新する
+          state.gameList = state.gameList.map(game => {
+            if (game.id === updatedGame.id) {
+              // IDが一致するアイテムを更新する
+              return updatedGame;
+            }
+            return game;
+          });
+        } else if (method === "DELETE" && data) {
+          // ゲーム削除
+          const result = await deleteApi(gameUrl, data);
+          const deletedGame = result as GameData;
+          // リスト内を探索し、対象ゲームを削除する
+          state.gameList = state.gameList.filter(game => {
+            // IDが一致するアイテムを除外する
+            return game.id !== deletedGame.id;
+          });
+        }
+      } catch (e) {
+        // 共通エラー処理
+        if (e.status && e.status === 401) {
+          // 認証エラーの場合、ログイン画面に遷移する
+          console.log(e.message);
+          await router.push({ name: "login" });
+        } else if (e.status) {
+          console.log(e.message);
+        } else {
+          console.log(e.message);
+        }
+      }
+    };
+
+    /**
+     * ゲームを新規作成する
+     */
     const createGame = () => {
       if (state.newGameName.length > 0) {
         const newGame: GameData = {
-          user_id: userId,
+          user_id: store.getters.getUserId,
           game_name: state.newGameName
         };
-        createGameApi(newGame)
-          .then(res => state.gameList.unshift(res.data.data))
-          .catch(err => err);
+        execRequest("POST", newGame);
         closeModal();
       } else {
         alert("メッセージを入力してください");
@@ -114,50 +162,17 @@ export default defineComponent({
      * ゲームを更新する
      * @param {GameData} targetGame
      */
-    const updateGame = (targetGame: GameData) => {
-      updateGameApi(targetGame)
-        .then(res => {
-          const updatedGame = res.data.data;
-          // リスト内のゲームを探索し、対象アイテムを更新する
-          state.gameList = state.gameList.map(game => {
-            if (game.id === updatedGame.id) {
-              // IDが一致するアイテムを更新する
-              return updatedGame;
-            }
-            return game;
-          });
-        })
-        .catch(err => err);
-    };
+    const updateGame = (targetGame: GameData) => execRequest("PUT", targetGame);
 
     /**
      * ゲームを削除する
      * @param {GameData} targetGame
      */
-    const deleteGame = (targetGame: GameData) => {
-      deleteGameApi(targetGame)
-        .then(res => {
-          const deletedGame = res.data.data;
-          // リスト内を探索し、対象ゲームを削除する
-          state.gameList = state.gameList.filter(game => {
-            // IDが一致するアイテムを除外する
-            return game.id !== deletedGame.id;
-          });
-        })
-        .catch(err => err);
-    };
+    const deleteGame = (targetGame: GameData) =>
+      execRequest("DELETE", targetGame);
 
-    // 初期表示時の処理
-    getGamesApi(userId, token)
-      .then(res => (state.gameList = res.data.data))
-      .catch(err => {
-        if (err.response.statusText === "Unauthorized") {
-          store.dispatch("resetAuth");
-          // router.push("/login");
-        } else {
-          return err;
-        }
-      });
+    // 初期表示時にゲームリスト取得を実行
+    execRequest("GET");
 
     return {
       state,

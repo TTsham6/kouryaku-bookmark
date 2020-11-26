@@ -1,39 +1,29 @@
 import { GameData } from "@/types/type";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, Method } from "axios";
 import { createHeaders } from "../util/auth-util";
+import { HttpError } from "@/util/error-handler";
 
 const API_URL = process.env.VUE_APP_API_HOST + "/games/";
 const timeout = 15000;
 const headers: { [key: string]: string } = {};
 
 /**
- * ゲーム一覧を取得する
- * @param {number} userId
- * @returns {Promise<any>}
+ *
+ * @param userId
  */
-export const getGamesApi = async (
-  userId: number,
-  token: string
-): Promise<any> => {
-  // headers["Content-Type"] = "application/x-www-form-urlencoded";
-  // if (token) {
-  //   headers["Authorization"] = "Token ${authState.token}";
-  //   headers["User-Id"] = String(userId);
-  // }
-
+export const getGamesApi = async (userId: number) => {
   const headers = createHeaders("application/x-www-form-urlencoded");
-
-  const config: AxiosRequestConfig = {
-    url: API_URL,
-    method: "get",
-    headers,
-    timeout,
-    params: {
-      user_id: userId
-    }
+  const params = {
+    user_id: String(userId)
   };
+  const queryParams = new URLSearchParams(params);
 
-  return axios(config);
+  const res = await fetch(API_URL + "?" + queryParams, { headers });
+
+  if (!res.ok) {
+    throw new HttpError(res.status);
+  }
+  return res.json();
 };
 
 /**

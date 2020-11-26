@@ -21,24 +21,6 @@ export default defineComponent({
     Header,
     LoginContainer,
     Footer
-  },
-  setup() {
-    // トークンの有無によってログイン状態を判定する
-    const token = computed(() => store.getters.getToken);
-
-    // トークン取得済みであれば、ホーム画面に遷移する
-    watch(
-      token,
-      () => {
-        if (token.value) {
-          router.push("/home");
-        }
-      },
-      // 初期表示時に処理を呼び出すためのオプション
-      { immediate: true }
-    );
-
-    return { token };
   }
 });
 </script>

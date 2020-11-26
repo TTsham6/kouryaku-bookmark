@@ -7,10 +7,10 @@
       <div class="field">
         <div class="control">
           <input
+            v-model="state.email"
             class="input is-large"
             type="email"
             placeholder="Eメール"
-            v-model="state.email"
             autofocus=""
             name="email"
           />
@@ -20,10 +20,10 @@
       <div class="field">
         <div class="control">
           <input
+            v-model="state.password"
             class="input is-large"
             type="password"
             placeholder="パスワード"
-            v-model="state.password"
             maxlength="20"
             name="password"
           />
@@ -48,7 +48,8 @@ import { defineComponent, reactive } from "vue";
 import store from "../../store";
 import { createUser } from "@/api/user-api";
 import { useRouter } from "vue-router";
-
+import { createApi } from "@/api";
+import { UserData } from "@/types/type";
 
 export default defineComponent({
   setup() {
@@ -60,11 +61,17 @@ export default defineComponent({
     const router = useRouter();
 
     // ユーザー登録する
-    const registUser = (email: string, password: string) => {
-      createUser({ email, password }).then(res => {
-        // ユーザー登録に成功したら、ログインを実行し、Storeにトークンを保存する
-        store.dispatch("fetchAuth", { email, password });
-      });
+    const registUser = async (email: string, password: string) => {
+      const newUser: UserData = { email, password };
+      try {
+        const result = await createApi("users", newUser);
+        if (result) {
+          // ユーザー登録に成功したら、ログインを実行し、Storeにトークンを保存する
+          await store.dispatch("fetchAuth", { email, password });
+        }
+      } catch (e) {
+        console.log(e.message);
+      }
     };
 
     return {

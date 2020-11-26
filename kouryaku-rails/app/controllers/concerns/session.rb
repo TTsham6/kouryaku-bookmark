@@ -14,6 +14,6 @@ module Session
 	end
 
 	def self.destroy(token)
-		REDIS.delete(token)
+		REDIS.del(token)
 	end
 end

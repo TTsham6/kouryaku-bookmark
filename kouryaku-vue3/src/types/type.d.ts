@@ -1,5 +1,5 @@
 export interface AuthData {
-  tenant: string;
+  id?: number;
   user_id: number;
   token: string;
 }
@@ -23,3 +23,5 @@ export interface BookmarkData {
   url?: string;
   category?: string;
 }
+
+export type ResourceData = UserData | GameData | BookmarkData;

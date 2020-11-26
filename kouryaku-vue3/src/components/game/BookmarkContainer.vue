@@ -15,21 +15,21 @@
       </button>
     </div>
     <!-- モーダル -->
-    <modal-template @close="closeModal" v-if="state.showCreateModal">
-      <template v-slot:body>
+    <modal-template v-if="state.showCreateModal" @close="closeModal">
+      <template #body>
         <p>ブックマーク作成</p>
         <div>
           <input
-            type="text"
             v-model="state.newBookmarkName"
+            type="text"
             placeholder="ブックマーク名を入力"
           />
         </div>
         <div>
-          <input type="text" v-model="state.newUrl" placeholder="URLを入力" />
+          <input v-model="state.newUrl" type="text" placeholder="URLを入力" />
         </div>
       </template>
-      <template v-slot:footer>
+      <template #footer>
         <button class="custom-button" @click="createBookmark">送信</button>
         <button class="custom-button" @click="closeModal">閉じる</button>
       </template>
@@ -56,15 +56,12 @@
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import { useRoute } from "vue-router";
-import {
-  getBookmarksApi,
-  createBookmarkApi,
-  updateBookmarkApi,
-  deleteBookmarkApi
-} from "../../api/bookmark-api";
 import { BookmarkData } from "../../types/type";
 import ModalTemplate from "../ModalTemplate.vue";
 import BookmarkItem from "./BookmarkItem.vue";
+import { Method } from "axios";
+import router from "@/router";
+import { createApi, deleteApi, indexApi, updateApi } from "@/api";
 
 export default defineComponent({
   components: {
@@ -78,14 +75,6 @@ export default defineComponent({
       query: { name }
     } = useRoute();
 
-    /** テストデータ */
-    const testData: BookmarkData = {
-      id: 1,
-      game_id: 1,
-      bookmark_name: "時の神殿攻略",
-      url: "hoge.com"
-    };
-
     /** state */
     const state = reactive<{
       bookmarkList: BookmarkData[];
@@ -95,13 +84,15 @@ export default defineComponent({
       gameId: number;
       gameName: string;
     }>({
-      bookmarkList: [testData],
+      bookmarkList: [],
       newBookmarkName: "",
       newUrl: "",
       showCreateModal: false,
       gameId: Number(game_id),
       gameName: String(name)
     });
+
+    // モーダル画面操作関数
 
     /** ブックマーク作成モーダルを開く */
     const openModal = () => {
@@ -111,6 +102,67 @@ export default defineComponent({
     /** ブックマーク作成モーダルを閉じる */
     const closeModal = () => {
       state.showCreateModal = false;
+    };
+
+    // APIアクセス関数
+
+    /**
+     * APIへのリクエストメイン処理
+     * @param {Method} method
+     * @param {BookmarkData} data
+     */
+    const execRequest = async (method: Method, data?: BookmarkData) => {
+      const bookmarkUrl = "bookmarks";
+      try {
+        // リクエストの種類によって呼び出すAPIを分岐
+        if (method === "GET") {
+          // ブッマークリスト取得
+          const params = {
+            game_id: String(state.gameId)
+          };
+          const result = await indexApi(bookmarkUrl, params);
+          state.bookmarkList = result as BookmarkData[];
+        } else if (method === "POST" && data) {
+          // ブックマーク新規作成
+          const result = await createApi(bookmarkUrl, data);
+          const newBookmark = result as BookmarkData;
+          state.bookmarkList.unshift(newBookmark);
+        } else if (method === "PUT" && data) {
+          // ブックマーク更新
+          const result = await updateApi(bookmarkUrl, data);
+          const updatedBookmark = result as BookmarkData;
+          // リスト内のブックマークを探索し、対象アイテムを更新する
+          state.bookmarkList = state.bookmarkList.map(
+            (bookmark: BookmarkData) => {
+              if (bookmark.id === updatedBookmark.id) {
+                // IDが一致するアイテムを更新する
+                return updatedBookmark;
+              }
+              return bookmark;
+            }
+          );
+        } else if (method === "DELETE" && data) {
+          // ブックマーク削除
+          const result = await deleteApi(bookmarkUrl, data);
+          const deletedBookmark = result as BookmarkData;
+          // リスト内を探索し、対象アイテムを削除する
+          state.bookmarkList = state.bookmarkList.filter(bookmark => {
+            // IDが一致するアイテムを除外する
+            return bookmark.id !== deletedBookmark.id;
+          });
+        }
+      } catch (e) {
+        // 共通エラー処理
+        if (e.status && e.status === 401) {
+          // 認証エラーの場合、ログイン画面に遷移する
+          console.log(e.message);
+          await router.push("/login");
+        } else if (e.status) {
+          console.log(e.message);
+        } else {
+          console.log(e.message);
+        }
+      }
     };
 
     /** ブックマークを新規作成する */
@@ -125,9 +177,7 @@ export default defineComponent({
           bookmark_name: state.newBookmarkName,
           url: state.newUrl
         };
-        createBookmarkApi(newBookmark)
-          .then(res => state.bookmarkList.unshift(res.data.data))
-          .catch(err => err);
+        execRequest("POST", newBookmark);
         closeModal();
       }
     };
@@ -136,44 +186,18 @@ export default defineComponent({
      * ブックマークを更新する
      * @param {BookmarkData} targetBookmark
      */
-    const updateBookmark = (targetBookmark: BookmarkData) => {
-      updateBookmarkApi(targetBookmark)
-        .then(res => {
-          const updateBookmark = res.data.data;
-          // リスト内のブックマークを探索し、対象アイテムを更新する
-          state.bookmarkList = state.bookmarkList.map((bookmark:BookmarkData) => {
-            if (bookmark.id === updateBookmark.id) {
-              // IDが一致するアイテムを更新する
-              return updateBookmark;
-            }
-            return bookmark;
-          });
-        })
-        .catch(err => err);
-    };
+    const updateBookmark = (targetBookmark: BookmarkData) =>
+      execRequest("PUT", targetBookmark);
 
     /**
      * ブックマークを削除する
      * @param {BookmarkData} targetBookmark
      */
-    const deleteBookmark = (targetBookmark: BookmarkData) => {
-      deleteBookmarkApi(targetBookmark)
-        .then(res => {
-          const deletedBookmark = res.data.data;
-          console.log(res);
-          // リスト内を探索し、対象アイテムを削除する
-          state.bookmarkList = state.bookmarkList.filter(bookmark => {
-            // IDが一致するアイテムを除外する
-            return bookmark.id !== deletedBookmark.id;
-          });
-        })
-        .catch(err => err);
-    };
+    const deleteBookmark = (targetBookmark: BookmarkData) =>
+      execRequest("DELETE", targetBookmark);
 
-    // 初期表示時の処理
-    getBookmarksApi(state.gameId)
-      .then(res => (state.bookmarkList = res.data.data))
-      .catch(err => err);
+    // 初期表示時にブックマークリストの取得を実行
+    execRequest("GET");
 
     return {
       state,

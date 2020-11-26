@@ -3,7 +3,7 @@ export interface RootState {
 }
 
 export interface AuthState {
-  userId: number;
+  user_id: number;
   token: string;
   loading: number;
   error: string;
