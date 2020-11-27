@@ -25,3 +25,9 @@ export interface BookmarkData {
 }
 
 export type ResourceData = UserData | GameData | BookmarkData;
+
+export interface JsonData {
+  data: ResourceData | ResourceData[];
+  message: string;
+  status: number;
+}

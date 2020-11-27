@@ -121,16 +121,16 @@ export default defineComponent({
             game_id: String(state.gameId)
           };
           const result = await indexApi(bookmarkUrl, params);
-          state.bookmarkList = result as BookmarkData[];
+          state.bookmarkList = result.data as BookmarkData[];
         } else if (method === "POST" && data) {
           // ブックマーク新規作成
           const result = await createApi(bookmarkUrl, data);
-          const newBookmark = result as BookmarkData;
+          const newBookmark = result.data as BookmarkData;
           state.bookmarkList.unshift(newBookmark);
         } else if (method === "PUT" && data) {
           // ブックマーク更新
           const result = await updateApi(bookmarkUrl, data);
-          const updatedBookmark = result as BookmarkData;
+          const updatedBookmark = result.data as BookmarkData;
           // リスト内のブックマークを探索し、対象アイテムを更新する
           state.bookmarkList = state.bookmarkList.map(
             (bookmark: BookmarkData) => {
@@ -144,7 +144,7 @@ export default defineComponent({
         } else if (method === "DELETE" && data) {
           // ブックマーク削除
           const result = await deleteApi(bookmarkUrl, data);
-          const deletedBookmark = result as BookmarkData;
+          const deletedBookmark = result.data as BookmarkData;
           // リスト内を探索し、対象アイテムを削除する
           state.bookmarkList = state.bookmarkList.filter(bookmark => {
             // IDが一致するアイテムを除外する

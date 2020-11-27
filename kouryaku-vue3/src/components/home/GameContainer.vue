@@ -100,16 +100,16 @@ export default defineComponent({
             user_id: String(store.getters.getUserId)
           };
           const result = await indexApi(gameUrl, params);
-          state.gameList = result as GameData[];
+          state.gameList = result.data as GameData[];
         } else if (method === "POST" && data) {
           // ゲーム新規作成
           const result = await createApi(gameUrl, data);
-          const newGame = result as GameData;
+          const newGame = result.data as GameData;
           state.gameList.unshift(newGame);
         } else if (method === "PUT" && data) {
           // ゲーム更新
           const result = await updateApi(gameUrl, data);
-          const updatedGame = result as GameData;
+          const updatedGame = result.data as GameData;
           // リスト内のゲームを探索し、対象アイテムを更新する
           state.gameList = state.gameList.map(game => {
             if (game.id === updatedGame.id) {
@@ -121,7 +121,7 @@ export default defineComponent({
         } else if (method === "DELETE" && data) {
           // ゲーム削除
           const result = await deleteApi(gameUrl, data);
-          const deletedGame = result as GameData;
+          const deletedGame = result.data as GameData;
           // リスト内を探索し、対象ゲームを削除する
           state.gameList = state.gameList.filter(game => {
             // IDが一致するアイテムを除外する

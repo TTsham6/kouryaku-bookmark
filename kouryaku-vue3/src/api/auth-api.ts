@@ -1,53 +1,46 @@
 import { AuthState } from "@/types/store-type";
-import { UserData } from "@/types/type";
+import { AuthData, UserData } from "@/types/type";
 import axios, { AxiosRequestConfig, Method, AxiosResponse } from "axios";
+import { createHeaders } from "@/util/auth-util";
+import { HttpError } from "@/util/error-handler";
 
 const API_URL = process.env.VUE_APP_API_HOST + "/auth/";
-const timeout = 15000;
-const headers: { [key: string]: string } = {};
 
-// ユーザー認証リクエスト
-export const getToken = async function(
-  authState: AuthState,
-  data: UserData
-): Promise<any> {
-  // ヘッダー作成
-  headers["Content-Type"] = "application/json";
-  if (authState.token) {
-    // 取得済みのトークンとユーザーIDを設定
-    headers["Authorization"] = "Token ${authState.token}";
-    headers["User-Id"] = String(authState.userId);
+/**
+ * 認証トークンを取得する
+ * @param {UserData} data
+ * @return {Promise<AuthJson>}
+ */
+export const getToken = async function(data: UserData): Promise<AuthData> {
+  const headers = createHeaders("application/json");
+  const body = JSON.stringify(data);
+  const res = await fetch(API_URL, { method: "POST", body, headers });
+
+  if (!res.ok) {
+    throw new HttpError(res.status);
   }
-
-  // リクエスト設定
-  const config: AxiosRequestConfig = {
-    url: API_URL,
-    method: "post",
-    headers,
-    timeout,
-    data
-  };
-
-  return axios(config);
+  return res.json();
 };
 
-export const deleteToken = async (authState: AuthState) => {
-  headers["Content-Type"] = "application/json";
-  if (authState.token) {
-    // 取得済みのトークンとユーザーIDを設定
-    headers["Authorization"] = "Token " + authState.token;
-    headers["User-Id"] = String(authState.userId);
-  }
-  // リクエスト設定
-  const config: AxiosRequestConfig = {
-    url: API_URL + String(authState.userId),
-    method: "delete",
-    headers,
-    timeout,
-    data: {
-      token: authState.token
-    }
-  };
+/**
+ * 認証トークンを削除する
+ * @param {AuthState} authState
+ * @return {Promise<AuthJson>}
+ */
+export const deleteToken = async (data: AuthData): Promise<AuthData> => {
+  const headers = createHeaders("application/json");
+  const body = JSON.stringify({ token: data.token });
 
-  return axios(config);
+  const res = await fetch(API_URL + String(data.user_id), {
+    method: "DELETE",
+    body,
+    headers
+  });
+
+  if (!res.ok && res.status !== 401) {
+    // トークン削除により認証エラーになるので401は正常系とみなし、除外する
+    throw new HttpError(res.status);
+  }
+
+  return res.json();
 };

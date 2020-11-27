@@ -1,4 +1,4 @@
-import { ResourceData } from "@/types/type";
+import { JsonData, ResourceData } from "@/types/type";
 import { createHeaders } from "@/util/auth-util";
 import { HttpError } from "@/util/error-handler";
 
@@ -12,7 +12,7 @@ const API_HOST = process.env.VUE_APP_API_HOST;
 export const indexApi = async (
   resourceUrl: string,
   params?: { user_id: string } | { game_id: string }
-): Promise<ResourceData[]> => {
+): Promise<JsonData> => {
   let url: string;
   if (params) {
     const queryParams = "?" + new URLSearchParams(params);
@@ -39,7 +39,7 @@ export const indexApi = async (
 export const createApi = async (
   resourceUrl: string,
   newData: ResourceData
-): Promise<ResourceData> => {
+): Promise<JsonData> => {
   const url = [API_HOST, resourceUrl].join("/");
   const body = JSON.stringify(newData);
   const headers = createHeaders("application/json");
@@ -60,7 +60,7 @@ export const createApi = async (
 export const updateApi = async (
   resourceUrl: string,
   targetData: ResourceData
-): Promise<ResourceData> => {
+): Promise<JsonData> => {
   const url = [API_HOST, resourceUrl, String(targetData.id)].join("/");
   const body = JSON.stringify(targetData);
   const headers = createHeaders("application/json");
@@ -81,7 +81,7 @@ export const updateApi = async (
 export const deleteApi = async (
   resourceUrl: string,
   targetData: ResourceData
-): Promise<ResourceData> => {
+): Promise<JsonData> => {
   const url = [API_HOST, resourceUrl, String(targetData.id)].join("/");
   const body = JSON.stringify(targetData);
   const headers = createHeaders("application/json");
