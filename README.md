@@ -20,7 +20,7 @@
 
 # 使用している技術
  
-* フロントエンド： Vue3.0(vue-router, vuex),　Typescript
+* フロントエンド： Vue3.0(vue-router, vuex),　TypeScript
 * バックエンド： Ruby on Rails (APIモード)
 * DB： MySQL, Redis(認証トークン管理用)
 * その他: MySQLとRedisはdocker-composeで構築
