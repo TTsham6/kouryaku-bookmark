@@ -76,5 +76,5 @@ yarn-debug.log*
 /kouryaku-vue3/yarn-error.log
 /kouryaku-vue3/yarn-debug.log*
 
-.idea/
-.DS_Store
+/.idea/
+/.DS_Store
