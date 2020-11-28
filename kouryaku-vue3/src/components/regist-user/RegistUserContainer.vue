@@ -46,6 +46,8 @@
 <script lang="ts">
 import { defineComponent, reactive } from "vue";
 import store from "../../store";
+import { createUser } from "@/api/user-api";
+import { useRouter } from "vue-router";
 import { createApi } from "@/api";
 import { UserData } from "@/types/type";
 
@@ -55,6 +57,8 @@ export default defineComponent({
       email: "",
       password: ""
     });
+
+    const router = useRouter();
 
     // ユーザー登録する
     const registUser = async (email: string, password: string) => {
@@ -72,7 +76,8 @@ export default defineComponent({
 
     return {
       state,
-      registUser
+      registUser,
+      router
     };
   }
 });
