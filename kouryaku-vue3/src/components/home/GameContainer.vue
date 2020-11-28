@@ -11,16 +11,16 @@
     </div>
 
     <!-- 新規作成モーダル -->
-    <modal-template v-if="state.showCreateModal" @close="closeModal">
-      <template #body>
+    <modal-template @close="closeModal" v-if="state.showCreateModal">
+      <template v-slot:body>
         <p>新規ゲーム作成</p>
         <input
-          v-model="state.newGameName"
           type="text"
+          v-model="state.newGameName"
           placeholder="ゲーム名を入力"
         />
       </template>
-      <template #footer>
+      <template v-slot:footer>
         <button class="custom-button" @click="createGame">送信</button>
         <button class="custom-button" @click="closeModal">閉じる</button>
       </template>

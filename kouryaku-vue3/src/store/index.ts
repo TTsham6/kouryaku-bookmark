@@ -44,6 +44,7 @@ export default createStore<AuthData>({
     setAuth(state, payload: AuthData) {
       state.user_id = payload.user_id;
       state.token = payload.token;
+      console.log(state);
     },
     destroyAuth(state, payload: AuthData) {
       console.log(payload);

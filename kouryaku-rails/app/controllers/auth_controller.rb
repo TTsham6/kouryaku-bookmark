@@ -12,9 +12,9 @@ class AuthController < ApplicationController
 		render json: { token: token ,user_id: user.id}, status: status
 	end
 
-	def destroy
+	def destory
 		token = params[:token]
-		token = Session.destroy(token)
+		token = Session.destory(token)
 		status = :unauthorized
 		render json: { status: 'SUCCESS', message: 'Deleted the Session'}, status: status
 	end

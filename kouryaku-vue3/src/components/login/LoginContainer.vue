@@ -1,6 +1,12 @@
 // ログイン画面メインコンテンツ
 <template>
   <div class="login-body container-fluid bg-1 text-center">
+    <!-- エラーメッセージ -->
+    <!-- <article v-show="errorMessage" class="message is-warning">
+        <div class="error-body">
+          {{ $t(errorMessage) }}
+        </div>
+      </article> -->
     <div class="login-body__content">
       <h3>ユーザーログイン</h3>
       <!-- Eメール入力欄 -->
@@ -36,7 +42,7 @@
       >
         ログイン
       </button>
-      <button @click="router.push({ name: 'registUser' })">
+      <button @click="router.push({ name: 'regist-user' })">
         ユーザー登録
       </button>
     </div>
@@ -46,7 +52,7 @@
 <script lang="ts">
 import { computed, defineComponent, reactive, watch } from "vue";
 import store from "../../store";
-import { useRouter } from "vue-router";
+import router from "vue-router";
 
 export default defineComponent({
   setup() {
@@ -58,20 +64,15 @@ export default defineComponent({
       password: ""
     });
 
-    const router = useRouter();
-
     /** ログインを実行する */
     const doLogin = (email: string, password: string) => {
       store.dispatch("fetchAuth", { email, password });
     };
 
-    /** */
-    const toRegistUser = () => router.push({ name: "regist-user" });
 
     return {
       state,
-      doLogin,
-      router
+      doLogin
     };
   }
 });

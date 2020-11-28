@@ -1,8 +1,7 @@
 // ユーザー登録画面
 <template>
-  <div class="regist-user-body">
+  <div class="regist-user">
     <Header />
-    <RegistUserContainer />
     <Footer />
   </div>
 </template>
@@ -10,7 +9,6 @@
 <script lang="ts">
 import { computed, defineComponent, watch } from "vue";
 import Header from "../components/Header.vue";
-import RegistUserContainer from "../components/regist-user/RegistUserContainer.vue";
 import Footer from "../components/Footer.vue";
 import store from "../store";
 import router from "../router";
@@ -19,7 +17,6 @@ export default defineComponent({
   name: "RegistUser",
   components: {
     Header,
-    RegistUserContainer,
     Footer
   },
   setup() {
@@ -31,7 +28,7 @@ export default defineComponent({
       token,
       () => {
         if (token.value) {
-          router.push("/home");
+          router.push("/");
         }
       },
       // 初期表示時に処理を呼び出すためのオプション
@@ -44,7 +41,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-.regist-user-body {
+.regist-user {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
