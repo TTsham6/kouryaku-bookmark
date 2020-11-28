@@ -7,3 +7,16 @@ services:
       - 6379:6379
     volumes:
       - ./redis/data:/data
+  mysql:
+    container_name: kouryaku-mysql
+    image: "mysql:latest"
+    environment:
+      MYSQL_DATABASE: ${DATABASE}
+      MYSQL_USER: ${USERNAME}
+      MYSQL_PASSWORD: ${USERPASS}
+      MYSQL_ROOT_PASSWORD: ${ROOTPASS}
+    ports:
+      - "3314:3306"
+    volumes:
+      - ./mysql/mysql/conf.d:/etc/mysql/conf.d
+      - ./log/mysql:/var/log/mysql

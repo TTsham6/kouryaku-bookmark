@@ -258,7 +258,7 @@ export default defineComponent({
     width: 100%;
     color: black;
     background: #f5f5f5;
-    border-left: solid 8px orange; /*左側の線*/
+    border-left: solid 8px lightseagreen; /*左側の線*/
     margin-bottom: 20px;
     border-radius: 0 15px 15px 0;
     padding: 1em;

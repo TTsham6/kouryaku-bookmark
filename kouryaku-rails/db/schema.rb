@@ -12,7 +12,7 @@
 
 ActiveRecord::Schema.define(version: 2020_10_23_033604) do
 
-  create_table "bookmarks", force: :cascade do |t|
+  create_table "bookmarks", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "game_id"
     t.string "bookmark_name"
     t.string "url"
@@ -21,14 +21,14 @@ ActiveRecord::Schema.define(version: 2020_10_23_033604) do
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "games", force: :cascade do |t|
+  create_table "games", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "user_id"
     t.string "game_name"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
   end
 
-  create_table "users", force: :cascade do |t|
+  create_table "users", options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "name"
     t.string "password_digest"
     t.string "email"
