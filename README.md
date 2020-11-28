@@ -1,1 +1,3 @@
-# kouryaku-bookmark
+# 攻略ブックマーク
+
+ゲームごとに攻略サイトのURLを保存するWEBアプリです。
